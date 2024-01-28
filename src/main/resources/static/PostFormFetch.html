@@ -21,6 +21,7 @@
             template = document.getElementById("categoriesTemplate").innerHTML;
             boutonAjouter.addEventListener("click", ajouteCategorie);
             chargeCategories();
+            boutonSupp.addEventListener("click",supprime)
         };
 
         // Transforme les données saisies dans le formulaire en format JSON
@@ -91,6 +92,34 @@
                 })
                 .catch(afficheMessage);
         }
+
+        function supprime(url) {
+            //url à appeler
+            fetch(url, {
+                //faire un appel fetch avec la méthode delete
+                method: 'delete',
+                headers : {
+                    //format que l'on veut accepter
+                    'Accept':'application/json',
+                    // ce que j'envoie avec précision de son format
+                    'Content-Type':'application/json'
+                },
+                body:serializeFormToJSON(formulaire)
+                })
+                // reaction en fonction des résultats
+                .then(response => {
+                    switch (response.status) {
+                        case 200:
+                            chargeCategories();
+                            break;
+                        case 409:
+                            afficheMessage("La categorie a des produits.");
+                            break;
+                        
+                    }
+                })
+                .catch(afficheMessage);
+        }
     </script>
 </head>
 
@@ -112,18 +141,19 @@
     <a href="/">Retour au menu</a>
 
     <!-- Le template Mustache qui sert à formatter la liste des catégories -->
-    <script id="categoriesTemplate" type="text/template">
-        <h2>Liste des catégories ({{_embedded.categories.length}} / {{page.totalElements}})</h2>
-        <TABLE>
+<script id="categoriesTemplate" type="text/template">
+    <h2>Liste des catégories ({{_embedded.categories.length}} / {{page.totalElements}})</h2>
+    <TABLE>
         {{! Un commentaire Mustache }}
-        <TR><TH>Code</TH><TH>Libelle</TH><TH>Description</TH></TR>
+        <TR><TH>Code</TH><TH>Libelle</TH><TH>Description</TH><th>Action</th></TR>
         {{! Pour chaque categorie dans le tableau 'categories' }}
         {{#_embedded.categories}}
         {{! Une ligne dans la table }}
-        <TR><TD>{{code}}</TD><TD>{{libelle}}</TD><TD>{{description}}</TD></TR>
+        <TR><TD>{{code}}</TD><TD>{{libelle}}</TD><TD>{{description}}</TD>
+            <td><button type="button" id="bouttonSupp" name="action" class="supprime" onclick="supprime('{{_links.self.href}}')">Supprimer</button></td></TR>
         {{/_embedded.categories}}
-        </TABLE>
-    </script>
+    </TABLE>
+</script>
 </body>
 
 </html>
